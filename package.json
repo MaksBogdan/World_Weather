@@ -4,9 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "test": "/ @jest-environment jsdom /echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "type": "module"
   },
   "author": "Bogdan Maks",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^3.2.0"
+  }
 }
