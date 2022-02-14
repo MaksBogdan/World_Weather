@@ -1,5 +1,5 @@
 "use strict"
-const link = `http://api.weatherstack.com/current?access_key=37a64b378ae88bb8e0f319f8599f7e4a`;
+const link = `http://api.weatherstack.com/current?access_key=37 a64b378ae88bb8e0f319f8599f7e4a`;
 // const fetchP = import('node-fetch').then(mod => mod.default);
 // const fetch = (...args) => fetchP.then(fn => fn(...args));
 // var jsdom = import("jsdom");
@@ -11,15 +11,12 @@ const form = document.getElementById("form");
 
 
 let store = {
-  //city:'',
-  city:'Grodno',
-  contry:'',
-  region: '',
-  feelslike: 0,
+  city: "Grodno",
   temperature: 0,
-  weather:'',
-  isDay:'',
-  properties:{
+  time: "00:00 AM",
+  isDay: "yes",
+  weather: "",
+  properties: {
     cloudcover: {},
     humidity: {},
     windSpeed: {},
@@ -33,44 +30,66 @@ const fethData = async () => {
   const resalt = await fetch (`${link}&query=${store.city}`);
   const data = await resalt.json();
   const {
-    location:{
-      name: city,
-      country,
-      region,
-    },
-    current:{
-      feelslike,
+    location: {
+      name 
+     },
+    current: {
       cloudcover,
       temperature,
-      properties,
-      weather_descriptions: weather,
+      humidity,
       observation_time: time,
+      pressure,
+      uv_index: uvIndex,
       visibility,
-      wind_speed: wind,
       is_day: isDay,
-      weather_icons: weatherIcons,
+      weather_descriptions: weather,
+      wind_speed: windSpeed,
     },
   } = data;
   
   store = {
     ...store,
-    city,
-    country,
-    region,
-    feelslike,
-    properties,
-    cloudcover,
-    temperature,
-    weather: weather[0],
-    weatherIcons,
-    time,
-    visibility,
-    wind,
     isDay,
-  };
+    city: name,
+    temperature,
+    time,
+    weather: weather[0],
+    properties: {
+      cloudcover: {
+        title: "cloudcover",
+        value: `${cloudcover}%`,
+        icon: "cloud.png",
+      },
+      humidity: {
+        title: "humidity",
+        value: `${humidity}%`,
+        icon: "humidity.png",
+      },
+      windSpeed: {
+        title: "wind speed",
+        value: `${windSpeed} km/h`,
+        icon: "wind.png",
+      },
+      pressure: {
+        title: "pressure",
+        value: `${pressure} %`,
+        icon: "gauge.png",
+      },
+      uvIndex: {
+        title: "uv Index",
+        value: `${uvIndex} / 100`,
+        icon: "uv-index.png",
+      },
+      visibility: {
+        title: "visibility",
+        value: `${visibility}%`,
+        icon: "visibility.png",
+      },
+    },
+  } 
   renderComponent();
   
-  console.log(data);
+  
 };
 
 const getImage = (weather) => {
@@ -90,6 +109,21 @@ const getImage = (weather) => {
       return 'the.png'
   }
 };
+const renderProperty = (properties) => {
+  return Object.values(properties)
+    .map(({ title, value, icon }) => {
+      return `<div class="property">
+            <div class="property-icon">
+              <img src="./img/icons/${icon}" alt="">
+            </div>
+            <div class="property-info">
+              <div class="property-info__value">${value}</div>
+              <div class="property-info__description">${title}</div>
+            </div>
+          </div>`;
+    })
+    .join("");
+}
 
 const markup = () => {
    const {city, time, temperature, properties, weather, isDay} = store;
@@ -115,7 +149,7 @@ const markup = () => {
                 </div>
               </div>
             </div>
-            <div id="properties">${properties}</div>
+            <div id="properties">${renderProperty(properties)}</div>
             </div>`;
 }
 const renderComponent = () => {
