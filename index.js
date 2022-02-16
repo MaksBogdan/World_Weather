@@ -1,14 +1,11 @@
 "use strict"
-const link = `http://api.weatherstack.com/current?access_key=37 a64b378ae88bb8e0f319f8599f7e4a`;
-// const fetchP = import('node-fetch').then(mod => mod.default);
-// const fetch = (...args) => fetchP.then(fn => fn(...args));
-// var jsdom = import("jsdom");
-// var JSDOM = jsdom.JSDOM;
+const link = `http://api.weatherstack.com/current?access_key=37a64b378ae88bb8e0f319f8599f7e4a`;
+
 const root = document.getElementById('root'); 
 const popup = document.getElementById("popup");
 const textInput = document.getElementById("text-input");
 const form = document.getElementById("form");
-
+const closePopup = document.getElementById('close');
 
 let store = {
   city: "Grodno",
@@ -24,73 +21,78 @@ let store = {
     uvIndex: {},
     visibility: {},
   },
-}
+};
 
 const fethData = async () => {
-  const resalt = await fetch (`${link}&query=${store.city}`);
-  const data = await resalt.json();
-  const {
-    location: {
-      name 
-     },
-    current: {
-      cloudcover,
+  try {
+    const resalt = await fetch (`${link}&query=${store.city}`);
+    const data = await resalt.json();
+    const {
+      location: {
+        name 
+       },
+      current: {
+        cloudcover,
+        temperature,
+        humidity,
+        observation_time: time,
+        pressure,
+        uv_index: uvIndex,
+        visibility,
+        is_day: isDay,
+        weather_descriptions: weather,
+        wind_speed: windSpeed,
+      },
+    } = data;
+    
+    store = {
+      ...store,
+      isDay,
+      city: name,
       temperature,
-      humidity,
-      observation_time: time,
-      pressure,
-      uv_index: uvIndex,
-      visibility,
-      is_day: isDay,
-      weather_descriptions: weather,
-      wind_speed: windSpeed,
-    },
-  } = data;
-  
-  store = {
-    ...store,
-    isDay,
-    city: name,
-    temperature,
-    time,
-    weather: weather[0],
-    properties: {
-      cloudcover: {
-        title: "cloudcover",
-        value: `${cloudcover}%`,
-        icon: "cloud.png",
+      time,
+      weather: weather[0],
+      properties: {
+        cloudcover: {
+          title: "cloudcover",
+          value: `${cloudcover}%`,
+          icon: "cloud.png",
+        },
+        humidity: {
+          title: "humidity",
+          value: `${humidity}%`,
+          icon: "humidity.png",
+        },
+        windSpeed: {
+          title: "wind speed",
+          value: `${windSpeed} km/h`,
+          icon: "wind.png",
+        },
+        pressure: {
+          title: "pressure",
+          value: `${pressure} %`,
+          icon: "gauge.png",
+        },
+        uvIndex: {
+          title: "uv Index",
+          value: `${uvIndex} / 100`,
+          icon: "uv-index.png",
+        },
+        visibility: {
+          title: "visibility",
+          value: `${visibility}%`,
+          icon: "visibility.png",
+        },
       },
-      humidity: {
-        title: "humidity",
-        value: `${humidity}%`,
-        icon: "humidity.png",
-      },
-      windSpeed: {
-        title: "wind speed",
-        value: `${windSpeed} km/h`,
-        icon: "wind.png",
-      },
-      pressure: {
-        title: "pressure",
-        value: `${pressure} %`,
-        icon: "gauge.png",
-      },
-      uvIndex: {
-        title: "uv Index",
-        value: `${uvIndex} / 100`,
-        icon: "uv-index.png",
-      },
-      visibility: {
-        title: "visibility",
-        value: `${visibility}%`,
-        icon: "visibility.png",
-      },
-    },
-  } 
-  renderComponent();
-  
-  
+    } 
+    renderComponent();
+    
+  } catch (err){
+    console.log(err);
+  };
 };
+
+
 
 const getImage = (weather) => {
   const weatherImg = weather.toLowerCase();
@@ -123,37 +125,67 @@ const renderProperty = (properties) => {
           </div>`;
     })
     .join("");
-}
+};
 
 const markup = () => {
    const {city, time, temperature, properties, weather, isDay} = store;
    const containerClass = isDay === 'yes' ? 'is-Day' : '';
    console.log(isDay);
-     return  `<div class="container ${containerClass}">
-              <div class="top">
-                 <div class="city">
-                  <div class="city-subtitle">Weather Today in</div>
-                    <div class="city-title" id="city">
-                    <span>${city}</span>
-                  </div>
-                </div>
-                <div class="city-info">
-                  <div class="top-left">
-                  <img class="icon" src = ./img/${getImage(weather)} alt = ''>
-                  <div class="description">${weather}</div>
-                </div>
-  
-                <div class="top-right">
-                 <div class="city-info__subtitle">as of ${time}</div>
-                  <div class="city-info__title">${temperature}°</div>
-                </div>
-              </div>
-            </div>
-            <div id="properties">${renderProperty(properties)}</div>
-            </div>`;
-}
+     return `<div class="container ${containerClass}">
+     <div class="top">
+        <div class="city">
+         <div class="city-subtitle">Weather Today in</div>
+           <div class="city-title" id="city">
+           <span>${city}</span>
+         </div>
+       </div>
+       <div class="city-info">
+         <div class="top-left">
+         <img class="icon" src = ./img/${getImage(weather)} alt = ''>
+         <div class="description">${weather}</div>
+       </div>
+     
+       <div class="top-right">
+        <div class="city-info__subtitle">as of ${time}</div>
+         <div class="city-info__title">${temperature}°</div>
+       </div>
+     </div>
+     </div>
+     <div id="properties">${renderProperty(properties)}</div>
+     </div>`;
+};
+
+const togglePopUpClass = () => {
+  popup.classList.toggle('active')
+};
 const renderComponent = () => {
   root.innerHTML = markup();
-} 
-fethData();
+
+const city = document.getElementById('city');
+  city.addEventListener('click', togglePopUpClass);
+};
+const handleInput = (newCity) => {
+  store = {
+    ...store,
+    city: newCity.target.value,
+  };
+};
+const handleSubmit = (intro) => {
+  intro.preventDefault();
+  if(!store.city) return null;
+  fethData();
+  togglePopUpClass();
+};
+const handleClose = (evt) => {
+  if(evt.target){
+    popup.display='none'
+  }
+    fethData();
+    togglePopUpClass();
+};
+form.addEventListener('submit', handleSubmit);
+textInput.addEventListener('input', handleInput);
+closePopup.addEventListener('click', handleClose,false);
+fethData(); 
+
   
