@@ -10,7 +10,7 @@ const closePopup = document.getElementById('close');
 let store = {
   city: "Grodno",
   temperature: 0,
-  time: "00:00 AM",
+  time: '00:00 AM',
   isDay: "yes",
   weather: "",
   properties: {
@@ -91,9 +91,6 @@ const fethData = async () => {
     console.log(err);
   };
 };
-
-
-
 const getImage = (weather) => {
   const weatherImg = weather.toLowerCase();
   switch(weatherImg){
@@ -129,8 +126,8 @@ const renderProperty = (properties) => {
 
 const markup = () => {
    const {city, time, temperature, properties, weather, isDay} = store;
-   const containerClass = isDay === 'yes' ? 'is-Day' : '';
    console.log(isDay);
+   const containerClass = isDay === 'yes' ? 'is-day' : '';
      return `<div class="container ${containerClass}">
      <div class="top">
         <div class="city">
